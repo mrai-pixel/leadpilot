@@ -1,0 +1,45 @@
+{
+  "summary": "Full-stack test of LeadPilot AI. Backend: 25 pytest tests across auth (demo/email login, JWT, bcrypt format), dashboard/org/agent, leads CRUD + CSV import + stage update, THE AI-call killer endpoint (score 91/HOT/APPOINTMENT + Saturday 11:30 AM appointment + follow-up + LLM summary) with persistence re-fetch, appointments/calls/activities — 25/25 passing. Frontend: demo login, dashboard KPIs, leads table+11 filters+search, Add Lead, Import CSV, complete killer flow (AI call modal -> progressive transcript -> result 91/HOT/Saturday 11:30 AM -> View updated lead -> lead profile shows 91/100, HOT LEAD, APPOINTMENT, AI summary, extracted info, breakdown +25/+20/+20/+15/+11, transcript modal), persistence after browser refresh, Pipeline kanban (Rahul in APPOINTMENT), Appointments, Calls modal, Agent save, Settings, logout + route protection, invalid-credential error, mobile 390px (no horizontal overflow). No blocking issues found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/appointments, /api/calls, /api/activities", "issue": "No organization_id filter — returns all tenants' data. Also GET/PUT /api/leads/{id}, /stage and /ai-call do not verify the lead belongs to the caller's organization (IDOR)."},
+      {"endpoint": "POST /api/auth/demo", "issue": "find_one result used without a None guard — would raise 500 (TypeError) if the seeded demo user is missing."},
+      {"endpoint": "POST /api/leads", "issue": "Returns 200 instead of 201 for resource creation."},
+      {"endpoint": "PUT /api/leads/{id}/stage", "issue": "Accepts any arbitrary status string (no enum validation) and returns 200 with null-ish body for a non-existent lead id instead of 404."},
+      {"endpoint": "POST /api/auth/login", "issue": "No rate limiting / brute-force lockout (playbook expects lockout after 5 failed attempts). JWT is returned in the body for localStorage (per product choice), so no httpOnly cookie is set."},
+      {"endpoint": "CORS middleware", "issue": "allow_credentials=True combined with default allow_origins='*' is an invalid/unsafe combination; set explicit CORS_ORIGINS."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AICallModal", "issue": "Radix console error: 'DialogContent requires a DialogTitle for accessibility' (plus missing aria-describedby). Reproduces every time the AI call modal opens.", "selector": "[data-testid=\"ai-call-modal\"]", "priority": "LOW"},
+      {"component": "AICallModal", "issue": "If POST /api/leads/{id}/ai-call fails, the catch block silently calls onClose() — the user gets no error feedback/toast and no retry.", "selector": "[data-testid=\"ai-call-modal\"]", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Appointments (/app/appointments)", "issues": ["Seeded appointment day labels do not match their dates: cards show 'Saturday · 2026-08-30' (actually Sunday) and 'Sunday · 2026-08-31' (actually Monday) because seed() assigns day names round-robin independent of the date. Rahul's AI-call appointment (Saturday · 2026-09-05) is correct."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/backend/tests/reset_rahul.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Add DialogTitle (VisuallyHidden if needed) to AICallModal DialogContent to clear the a11y console error",
+    "Show an error toast instead of silently closing AICallModal when the ai-call API fails",
+    "Scope /api/appointments, /api/calls, /api/activities and lead-by-id routes to the caller's organization_id",
+    "Derive appointment 'day' from the actual date in seed() so day names match dates",
+    "Add None guard in /api/auth/demo and 404 handling + status enum validation in /api/leads/{id}/stage"
+  ],
+  "critical_code_review_comments": [
+    "server.py is 808 lines and mixes config, seed data, scoring, LLM and routes — split into modules (routes/, seed.py, scoring.py) before it grows further",
+    "All list endpoints except /api/leads ignore organization_id; multi-tenancy is effectively unenforced",
+    "Test files placed in /app/backend/tests trigger uvicorn --reload restarts (watchfiles); harmless here but noisy in logs"
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py", "/app/backend/tests/reset_rahul.py"],
+  "success_rate": {"backend": "100% (25/25 pytest)", "frontend": "100% of tested flows (killer flow, all 8 pages, auth, persistence)"},
+  "seed_data_creation": "Created and auto-deleted TEST_-prefixed leads (TEST_Lead One, TEST_CSV Alpha/Beta, TEST_Stage Lead, TEST_AICall Lead, TEST_UI Lead, TEST_UI CSV1/CSV2). DB is back to the 22 seeded leads. Rahul Sharma was reset to CONTACTED/score 42 with calls/appointments/follow-ups cleared via /app/backend/tests/reset_rahul.py so the demo starts fresh.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@urbannest.ai / demo1234 (from /app/memory/test_credentials.md); one-click 'Try Demo Account' button also verified",
+  "context_for_next_testing_agent": "Run `python /app/backend/tests/reset_rahul.py` before re-testing the killer flow to restore Rahul to CONTACTED/42 (the AI call is idempotent so re-running also works). Backend suite: `cd /app/backend && python -m pytest tests/backend_test.py -q -n 0` (pytest.ini runs -n 2 --dist loadscope; the appointments assertion was made ordering-independent because the Rahul appointment only exists after the AI-call test). LLM summary via Emergent key works (real Claude output, ~295 chars). Drag-and-drop on Pipeline was not exercised — only column placement was verified.",
+  "rca_of_the_issue": "No functional defect found. The one initial pytest failure (TestOther::test_appointments) was a test-side ordering race under xdist (appointments class ran on a different worker before the AI-call class created Rahul's appointment); fixed in the test file, now passes both serially and in parallel."
+}

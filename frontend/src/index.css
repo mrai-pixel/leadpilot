@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 2.4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 32 95% 44%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 12%;
+    --muted-foreground: 240 4% 64%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 32 95% 44%;
+    --radius: 0.5rem;
+  }
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  margin: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, .font-head {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(240 4% 18%); border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(240 4% 26%); }
+
+::selection { background: hsl(32 95% 44% / 0.3); color: #fff; }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 hsl(217 91% 60% / 0.5); }
+  70% { box-shadow: 0 0 0 12px hsl(217 91% 60% / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(217 91% 60% / 0); }
+}
+.pulse-ring { animation: pulse-ring 1.8s infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.5s ease both; }
+
+.glow-blue { box-shadow: 0 0 20px hsl(217 91% 60% / 0.25); }
+.glow-amber { box-shadow: 0 0 24px hsl(32 95% 44% / 0.22); }
+
+.grid-bg {
+  background-image: radial-gradient(hsl(240 4% 16% / 0.6) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
