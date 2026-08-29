@@ -260,6 +260,59 @@ class TestAICall:
         assert d["temperature"] in ("HOT", "WARM", "COLD")
 
 
+# ------------------------------------------------------------------ ai-call idempotency (bug fix iteration 2)
+class TestAICallIdempotency:
+    def test_repeat_ai_call_does_not_duplicate_appointment_or_followup(self, client):
+        created = client.post(f"{BASE_URL}/api/leads",
+                              json={"name": "TEST_Idem Lead", "budget": "₹2.2 Cr",
+                                    "requirement": "3BHK", "timeline": "45 days"}, timeout=30).json()
+        lid = created["id"]
+        assert created["lead_score"] == 15 or created["lead_score"] >= 0
+        # first call
+        r1 = client.post(f"{BASE_URL}/api/leads/{lid}/ai-call", json={}, timeout=120)
+        assert r1.status_code == 200, r1.text[:300]
+        det1 = client.get(f"{BASE_URL}/api/leads/{lid}", timeout=30).json()
+        assert len([a for a in det1["appointments"] if a["type"] == "Site Visit"]) == 1
+        assert len([f for f in det1["followups"] if f["status"] == "Scheduled"]) == 1
+        score1 = det1["lead"]["lead_score"]
+        # second call — must replace, not stack
+        r2 = client.post(f"{BASE_URL}/api/leads/{lid}/ai-call", json={}, timeout=120)
+        assert r2.status_code == 200, r2.text[:300]
+        det2 = client.get(f"{BASE_URL}/api/leads/{lid}", timeout=30).json()
+        sv = [a for a in det2["appointments"] if a["type"] == "Site Visit" and a["status"] == "Scheduled"]
+        assert len(sv) == 1, f"duplicate appointments: {sv}"
+        fu = [f for f in det2["followups"] if f["status"] == "Scheduled"]
+        assert len(fu) == 1, f"duplicate followups: {fu}"
+        assert det2["lead"]["lead_score"] == score1
+        assert det2["lead"]["status"] == "APPOINTMENT"
+        assert det2["lead"]["budget"] == "₹2.2 Cr"
+        assert det2["lead"]["requirement"] == "3BHK"
+        assert det2["lead"]["timeline"] == "45 days"
+        assert det2["lead"]["location"] == "Gurgaon"
+        assert det2["lead"]["financing"] == "Home Loan"
+        assert det2["lead"]["intent"] == "High"
+        # cross-page consistency: appointment + call visible in global lists
+        appts = client.get(f"{BASE_URL}/api/appointments", timeout=30).json()
+        assert len([a for a in appts if a["lead_id"] == lid and a["status"] == "Scheduled"]) == 1
+        calls = client.get(f"{BASE_URL}/api/calls", timeout=30).json()
+        assert len([c for c in calls if c["lead_id"] == lid]) >= 1
+        client.delete(f"{BASE_URL}/api/leads/{lid}", timeout=30)
+
+    def test_repeat_star_lead_ai_call_stays_single(self, client):
+        leads = client.get(f"{BASE_URL}/api/leads", timeout=30).json()
+        rahul = next(l for l in leads if l["name"] == "Rahul Sharma")
+        for _ in range(2):
+            r = client.post(f"{BASE_URL}/api/leads/{rahul['id']}/ai-call", json={}, timeout=120)
+            assert r.status_code == 200, r.text[:300]
+        det = client.get(f"{BASE_URL}/api/leads/{rahul['id']}", timeout=30).json()
+        sv = [a for a in det["appointments"] if a["type"] == "Site Visit" and a["status"] == "Scheduled"]
+        assert len(sv) == 1, f"duplicate star appointments: {len(sv)}"
+        assert len([f for f in det["followups"] if f["status"] == "Scheduled"]) == 1
+        assert det["lead"]["lead_score"] == 91 and det["lead"]["temperature"] == "HOT"
+        assert det["lead"]["status"] == "APPOINTMENT"
+        assert sv[0]["day"] == "Saturday" and sv[0]["time"] == "11:30 AM"
+
+
 # ------------------------------------------------------------------ appointments / calls / activities
 class TestOther:
     def test_appointments(self, client):

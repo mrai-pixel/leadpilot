@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { ScoreMeter, TempBadge } from "@/components/shared";
@@ -14,64 +14,81 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
   const [seconds, setSeconds] = useState(0);
   const scrollRef = useRef(null);
   const timers = useRef([]);
+  const runRef = useRef(null); // single in-flight ai-call per open (guards StrictMode double-invoke)
+  const completedRef = useRef(false); // ensures parent refresh fires exactly once
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      runRef.current = null;
+      return;
+    }
     setPhase("connecting");
     setVisible([]);
     setResult(null);
     setSeconds(0);
     setTyping(false);
+    completedRef.current = false;
     timers.current = [];
 
-    let mounted = true;
+    let cancelled = false;
+    const isActive = () => !cancelled;
     const secInt = setInterval(() => setSeconds((s) => s + 1), 1000);
 
-    (async () => {
-      try {
-        const { data } = await api.post(`/leads/${lead.id}/ai-call`);
-        if (!mounted) return;
+    // Fire the mutation exactly ONCE per modal-open (reused across StrictMode remount).
+    if (!runRef.current || runRef.current.leadId !== lead.id) {
+      runRef.current = {
+        leadId: lead.id,
+        promise: api.post(`/leads/${lead.id}/ai-call`).then((r) => r.data),
+      };
+    }
+
+    runRef.current.promise
+      .then((data) => {
+        if (cancelled) return;
         setResult(data);
-        // brief "connecting" then play transcript
         const t0 = setTimeout(() => {
-          if (!mounted) return;
+          if (cancelled) return;
           setPhase("talking");
-          playTranscript(data.transcript, mounted);
+          playTranscript(data.transcript, isActive, data);
         }, 1400);
         timers.current.push(t0);
-      } catch (e) {
+      })
+      .catch(() => {
+        runRef.current = null;
         toast.error("Could not connect the AI call. Please try again.");
         onClose?.();
-      }
-    })();
+      });
 
     return () => {
-      mounted = false;
+      cancelled = true;
       clearInterval(secInt);
       timers.current.forEach(clearTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const playTranscript = (transcript, mounted) => {
+  const playTranscript = (transcript, isActive, data) => {
     let delay = 0;
     transcript.forEach((line, idx) => {
       const isAI = line.speaker === "AI";
-      // typing indicator
       const tStart = setTimeout(() => {
-        if (mounted) setTyping(isAI ? "AI" : "Lead");
+        if (isActive()) setTyping(isAI ? "AI" : "Lead");
       }, delay);
       timers.current.push(tStart);
       delay += isAI ? 1100 : 700;
       const tShow = setTimeout(() => {
-        if (!mounted) return;
+        if (!isActive()) return;
         setTyping(false);
         setVisible((v) => [...v, line]);
         setTimeout(() => {
           if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }, 40);
         if (idx === transcript.length - 1) {
-          const tDone = setTimeout(() => mounted && setPhase("done"), 900);
+          const tDone = setTimeout(() => {
+            if (!isActive()) return;
+            setPhase("done");
+            fireComplete(data); // refresh parent from DB as soon as the call is done
+          }, 900);
           timers.current.push(tDone);
         }
       }, delay);
@@ -80,21 +97,35 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
     });
   };
 
+  const fireComplete = (data) => {
+    if (completedRef.current) return;
+    completedRef.current = true;
+    onComplete?.(data || result);
+  };
+
   const mm = String(Math.floor(seconds / 60)).padStart(1, "0");
   const ss = String(seconds % 60).padStart(2, "0");
 
-  const finish = () => {
-    onComplete?.(result);
+  // Any close path refreshes the parent from the DB if the mutation already ran.
+  const close = () => {
+    if (result) fireComplete(result);
     onClose?.();
   };
 
+  const finish = () => {
+    close();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose?.()}>
+    <Dialog open={open} onOpenChange={(o) => !o && close()}>
       <DialogContent
         className="max-w-lg border-border bg-[#050505] p-0 overflow-hidden"
         data-testid="ai-call-modal"
       >
         <DialogTitle className="sr-only">AI Sales Call with {lead?.name}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Simulated demo AI sales call. The AI qualifies the lead and books a site visit.
+        </DialogDescription>
         {/* header */}
         <div className="flex items-center justify-between border-b border-border bg-black px-6 py-4">
           <div>
@@ -197,7 +228,7 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
           <div className="border-t border-border bg-black px-6 py-3">
             <Button
               variant="ghost"
-              onClick={onClose}
+              onClick={close}
               className="w-full gap-2 text-muted-foreground hover:text-red-400"
               data-testid="call-hangup-btn"
             >

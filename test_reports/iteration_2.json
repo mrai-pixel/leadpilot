@@ -1,0 +1,42 @@
+{
+  "summary": "Targeted retest of the AI-call persistence bug fix. Backend: extended /app/backend/tests/backend_test.py with a new TestAICallIdempotency class (repeat ai-call on a custom lead + on the star lead Rahul) — 27/27 pytest passing. Confirmed POST /api/leads/{id}/ai-call is idempotent: after 2 calls exactly ONE Scheduled Site Visit appointment and ONE Scheduled follow-up remain, lead fields (score/status/budget/requirement/timeline/location/financing/intent) persisted, and the global /api/appointments list also shows exactly one appointment for that lead. Frontend (Playwright, real public URL): (1) demo login -> Leads -> Add Lead (budget ₹2.2 Cr / 3BHK / 45 days) -> profile shows 15/100 COLD, 0 appointments; (2) Start AI Call -> transcript plays -> call-result panel shows score/temp/Status→APPOINTMENT/Saturday 11:30 AM/Follow-up created; (3) CLOSE VIA ESCAPE -> profile immediately refreshed to the persisted values (79/100, APPOINTMENT badge, AI Lead Summary, score breakdown, extracted info budget ₹2.2 Cr / 3BHK / Gurgaon / 45 days / Home Loan / High, 1 appointment card 'Site Visit Saturday · 11:30 AM · 2026-09-05', 1 follow-up card) — NOT stale 15/COLD; (4) browser reload keeps identical values; (5) running the AI call a 2nd time still yields exactly 1 appointment + 1 follow-up (2 call rows, expected); (6) BUTTON path with a second new lead (30 days) -> 91/100 HOT after 'View updated lead' and after reload; (7) cross-page: both leads appear in the Pipeline APPOINTMENT column, Appointments page shows their Site Visit, Calls page row opens summary+transcript modal; (8) REGRESSION: Rahul Sharma 42 -> 91/100 HOT / APPOINTMENT / Saturday 11:30 AM with 1 appointment + 1 follow-up, persisted after reload. No stale-state, no duplicate, and no console errors found (only a Radix aria-describedby warning).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/leads/{id}/ai-call", "issue": "Calls are not deduped (2nd run adds a 2nd call row for the same lead). Appointments/follow-ups are correctly replaced. Likely intentional (call history), noted for awareness only."},
+      {"endpoint": "GET /api/appointments, /api/calls, /api/activities + /api/leads/{id}", "issue": "Still no organization_id scoping (IDOR / cross-tenant read) — carried over from iteration 1, unchanged."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AICallModal", "issue": "Radix console warning remains: 'Missing Description or aria-describedby={undefined} for DialogContent' (DialogTitle error from iteration 1 is fixed).", "selector": "[data-testid=\"ai-call-modal\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Lead profile / AI summary", "issues": ["The LLM summary treats the lead NAME as a project/locality ('a 3BHK unit at QA Escape 10132, Gurgaon'), because the prompt appears to feed the lead name into the property context. Harmless for real names but reads oddly; consider prompt wording."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/cleanup_qa_leads.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional: add aria-describedby / DialogDescription to AICallModal to clear the last Radix a11y warning",
+    "Optional: scope appointments/calls/activities/lead-by-id endpoints to the caller's organization_id (pre-existing)",
+    "Note for expectation alignment: a lead with timeline '45 days' scores 79/WARM (timeline gives +8, not +20). The review request expected ~86/HOT for a 45-day lead; if HOT is desired for 45 days, adjust compute_score thresholds — otherwise behaviour is correct as coded."
+  ],
+  "critical_code_review_comments": [
+    "AICallModal runRef + completedRef guards correctly prevent the StrictMode double POST and duplicate parent refresh; close() -> fireComplete(result) covers backdrop/Escape/End-call/finish paths. Verified in-browser.",
+    "Backend delete_many before insert makes the ai-call endpoint idempotent for appointments/follow-ups; consider doing the same for the follow-up type filter to avoid deleting unrelated user-created scheduled follow-ups for the lead (currently ALL Scheduled follow-ups of that lead are deleted).",
+    "server.py remains >800 lines and mixes seed/scoring/LLM/routes — still worth splitting."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py", "/app/backend/tests/cleanup_qa_leads.py"],
+  "success_rate": {"backend": "100% (27/27 pytest)", "frontend": "100% of tested flows (escape-close, button-close, reload persistence, no-duplicates, 2nd call idempotency, pipeline/appointments/calls cross-page, Rahul regression)"},
+  "seed_data_creation": "Created 'QA Escape 10132' and 'QA Button 10222' leads plus TEST_ leads; all deleted afterwards with /app/backend/tests/cleanup_qa_leads.py (which also removed the stale 'Mayank Test' x3 and 'Persist QA' leads left by earlier runs). Rahul Sharma reset to CONTACTED/42 via reset_rahul.py — demo DB is clean.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "demo@urbannest.ai / demo1234 (also one-click data-testid='demo-login-btn')",
+  "context_for_next_testing_agent": "Bug is fixed and verified end-to-end. Run `python /app/backend/tests/reset_rahul.py` before demoing/retesting the star flow and `python /app/backend/tests/cleanup_qa_leads.py` afterwards to purge QA/TEST/Mayank/Persist leads. Backend suite: `cd /app/backend && python -m pytest tests/backend_test.py -q -n 0`. Non-star lead scores depend on the timeline string (30 days -> 91/HOT, 45 days -> 79/WARM). Pipeline drag-and-drop still not exercised.",
+  "rca_of_the_issue": "Original defect (stale profile after non-button close + StrictMode duplicate POST) no longer reproduces. Escape-close now refreshes the lead via onComplete->load() and the DB holds exactly one appointment/follow-up per lead because the backend deletes existing Scheduled Site Visit/follow-up docs before inserting. Verified via UI (card counts) and API (GET /api/leads/{id} and /api/appointments)."
+}

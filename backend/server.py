@@ -715,7 +715,10 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.leads.update_one({"id": lead_id}, {"$set": lead_update})
 
-    # Appointment
+    # Appointment (idempotent: replace any existing open site-visit for this lead)
+    await db.appointments.delete_many(
+        {"lead_id": lead_id, "type": "Site Visit", "status": "Scheduled"}
+    )
     appt = {
         "id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"], "lead_score": score,
         "date": sat_date, "day": sat_day, "time": sat_time, "type": "Site Visit",
@@ -723,7 +726,8 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.appointments.insert_one(appt)
 
-    # Follow-up
+    # Follow-up (idempotent: replace prior AI-scheduled follow-up for this lead)
+    await db.followups.delete_many({"lead_id": lead_id, "type": "message", "status": "Scheduled"})
     fup = {
         "id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"],
         "type": "message", "status": "Scheduled",
