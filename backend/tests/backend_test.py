@@ -313,6 +313,110 @@ class TestAICallIdempotency:
         assert sv[0]["day"] == "Saturday" and sv[0]["time"] == "11:30 AM"
 
 
+# ------------------------------------------------------------------ NEW: auto-call on create + reset + replay
+class TestAutoCallOnCreate:
+    def test_create_with_auto_call_true(self, client):
+        payload = {"name": "TEST_AutoCall Lead", "budget": "₹2.1 Cr",
+                   "requirement": "3BHK", "timeline": "30 days", "auto_call": True}
+        r = client.post(f"{BASE_URL}/api/leads", json=payload, timeout=120)
+        assert r.status_code == 200, r.text[:300]
+        d = r.json()
+        assert d.get("auto_called") is True
+        assert d["status"] == "APPOINTMENT"
+        assert d["lead_score"] > 15
+        assert d["temperature"] in ("HOT", "WARM")
+        # persistence
+        det = client.get(f"{BASE_URL}/api/leads/{d['id']}", timeout=30).json()
+        assert det["lead"]["status"] == "APPOINTMENT"
+        assert det["lead"]["lead_score"] == d["lead_score"]
+        assert len([a for a in det["appointments"] if a["type"] == "Site Visit"]) == 1
+        assert len(det["calls"]) == 1
+        assert len([f for f in det["followups"] if f["status"] == "Scheduled"]) == 1
+        assert det["lead"]["ai_summary"]
+        client.delete(f"{BASE_URL}/api/leads/{d['id']}", timeout=30)
+
+    def test_create_with_auto_call_false(self, client):
+        payload = {"name": "TEST_NoAutoCall Lead", "budget": "₹1.6 Cr",
+                   "requirement": "2BHK", "timeline": "60 days", "auto_call": False}
+        r = client.post(f"{BASE_URL}/api/leads", json=payload, timeout=30)
+        assert r.status_code == 200
+        d = r.json()
+        assert d.get("auto_called") is not True
+        assert d["status"] == "NEW"
+        assert d["lead_score"] == 15
+        det = client.get(f"{BASE_URL}/api/leads/{d['id']}", timeout=30).json()
+        assert det["calls"] == []
+        assert det["appointments"] == []
+        assert [f for f in det["followups"] if f["status"] == "Scheduled"] == []
+        client.delete(f"{BASE_URL}/api/leads/{d['id']}", timeout=30)
+
+    def test_create_omitting_auto_call_stays_new(self, client):
+        r = client.post(f"{BASE_URL}/api/leads",
+                        json={"name": "TEST_Default Lead"}, timeout=30)
+        assert r.status_code == 200
+        d = r.json()
+        assert d["status"] == "NEW" and d["lead_score"] == 15
+        assert d.get("auto_called") is not True
+
+
+class TestResetLead:
+    def test_reset_star_lead_reverts_to_contacted_42(self, client):
+        leads = client.get(f"{BASE_URL}/api/leads", timeout=30).json()
+        rahul = next(l for l in leads if l["name"] == "Rahul Sharma")
+        # ensure called
+        client.post(f"{BASE_URL}/api/leads/{rahul['id']}/ai-call", json={}, timeout=120)
+        # reset
+        r = client.post(f"{BASE_URL}/api/leads/{rahul['id']}/reset", json={}, timeout=30)
+        assert r.status_code == 200, r.text[:300]
+        lead = r.json()["lead"]
+        assert lead["status"] == "CONTACTED"
+        assert lead["lead_score"] == 42
+        assert lead["temperature"] == "WARM"
+        assert lead["ai_summary"] == ""
+        assert lead["score_breakdown"] == []
+        assert lead["budget"] == "" and lead["timeline"] == "" and lead["intent"] == ""
+        # related collections cleared
+        det = client.get(f"{BASE_URL}/api/leads/{rahul['id']}", timeout=30).json()
+        assert det["calls"] == []
+        assert det["appointments"] == []
+        assert det["followups"] == []
+        assert det["activities"] == []
+
+    def test_reset_normal_lead_reverts_to_new_15(self, client):
+        created = client.post(f"{BASE_URL}/api/leads",
+                              json={"name": "TEST_Reset Norm", "budget": "₹2 Cr",
+                                    "requirement": "3BHK", "timeline": "30 days",
+                                    "auto_call": True}, timeout=120).json()
+        lid = created["id"]
+        assert created["status"] == "APPOINTMENT"
+        r = client.post(f"{BASE_URL}/api/leads/{lid}/reset", json={}, timeout=30)
+        assert r.status_code == 200
+        lead = r.json()["lead"]
+        assert lead["status"] == "NEW"
+        assert lead["lead_score"] == 15
+        assert lead["temperature"] == "COLD"
+        det = client.get(f"{BASE_URL}/api/leads/{lid}", timeout=30).json()
+        assert det["calls"] == [] and det["appointments"] == [] and det["followups"] == []
+        client.delete(f"{BASE_URL}/api/leads/{lid}", timeout=30)
+
+    def test_reset_then_replay_ai_call_no_duplicates(self, client):
+        leads = client.get(f"{BASE_URL}/api/leads", timeout=30).json()
+        rahul = next(l for l in leads if l["name"] == "Rahul Sharma")
+        client.post(f"{BASE_URL}/api/leads/{rahul['id']}/reset", json={}, timeout=30)
+        r = client.post(f"{BASE_URL}/api/leads/{rahul['id']}/ai-call", json={}, timeout=120)
+        assert r.status_code == 200
+        d = r.json()
+        assert d["score"] == 91 and d["temperature"] == "HOT"
+        assert d["lead"]["status"] == "APPOINTMENT"
+        det = client.get(f"{BASE_URL}/api/leads/{rahul['id']}", timeout=30).json()
+        assert len([a for a in det["appointments"] if a["type"] == "Site Visit"]) == 1
+        assert len([f for f in det["followups"] if f["status"] == "Scheduled"]) == 1
+
+    def test_reset_404(self, client):
+        r = client.post(f"{BASE_URL}/api/leads/does-not-exist/reset", json={}, timeout=30)
+        assert r.status_code == 404
+
+
 # ------------------------------------------------------------------ appointments / calls / activities
 class TestOther:
     def test_appointments(self, client):
