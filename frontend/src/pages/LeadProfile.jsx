@@ -4,9 +4,10 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, TempBadge, ScoreMeter, scoreColor, fmtTime } from "@/components/shared";
 import AICallModal from "@/components/AICallModal";
+import { toast } from "sonner";
 import {
   ArrowLeft, Phone, Sparkles, Calendar, Bell, FileText, IndianRupee,
-  Home, MapPin, Clock, Landmark, Zap, PhoneCall, X,
+  Home, MapPin, Clock, Landmark, Zap, PhoneCall, X, RotateCcw,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -32,6 +33,16 @@ export default function LeadProfile() {
 
   const load = () => api.get(`/leads/${id}`).then((r) => setD(r.data));
   useEffect(() => { load(); }, [id]);
+
+  const resetLead = async () => {
+    try {
+      await api.post(`/leads/${id}/reset`);
+      toast.success("Lead reset — ready to replay the AI call");
+      load();
+    } catch {
+      toast.error("Could not reset lead");
+    }
+  };
 
   if (!d) return <div className="text-muted-foreground">Loading lead…</div>;
   const l = d.lead;
@@ -64,9 +75,17 @@ export default function LeadProfile() {
             )}
           </div>
         </div>
-        <Button onClick={() => setCallOpen(true)} data-testid="start-ai-call-btn" size="lg" className="gap-2 bg-orange-600 text-white hover:bg-orange-700 glow-amber">
-          <Phone className="h-5 w-5" /> Start AI Call
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button onClick={() => navigate(`/report/leads/${l.id}`)} data-testid="report-btn" variant="outline" size="lg" className="gap-2 border-zinc-300 text-zinc-900 hover:border-zinc-900">
+            <FileText className="h-4 w-4" /> Report
+          </Button>
+          <Button onClick={resetLead} data-testid="reset-lead-btn" variant="outline" size="lg" className="gap-2 border-zinc-300 text-zinc-900 hover:border-zinc-900">
+            <RotateCcw className="h-4 w-4" /> Reset
+          </Button>
+          <Button onClick={() => setCallOpen(true)} data-testid="start-ai-call-btn" size="lg" className="gap-2 bg-orange-600 text-white hover:bg-orange-700 glow-amber">
+            <Phone className="h-5 w-5" /> Start AI Call
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

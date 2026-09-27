@@ -103,6 +103,7 @@ class LeadInput(BaseModel):
     location: str = "Gurgaon"
     timeline: str = ""
     financing: str = ""
+    auto_call: bool = False
 
 
 class CsvInput(BaseModel):
@@ -611,11 +612,14 @@ async def create_lead(inp: LeadInput, user: dict = Depends(get_current_user)):
         "created_at": now_iso(), "updated_at": now_iso(),
     }
     await db.leads.insert_one(doc)
+    doc.pop("_id", None)
     await db.activities.insert_one({
         "id": str(uuid.uuid4()), "lead_id": doc["id"], "lead_name": doc["name"],
         "type": "score", "description": f"New lead {doc['name']} added", "created_at": now_iso(),
     })
-    doc.pop("_id", None)
+    if inp.auto_call:
+        result = await run_ai_qualification(doc)
+        return {**result["lead"], "auto_called": True}
     return doc
 
 
@@ -653,12 +657,10 @@ async def update_stage(lead_id: str, inp: StageInput, user: dict = Depends(get_c
 
 
 # ------------------------------------------------------------------ THE AI CALL
-@api.post("/leads/{lead_id}/ai-call")
-async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
-    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
-    if not lead:
-        raise HTTPException(404, "Lead not found")
-
+async def run_ai_qualification(lead: dict) -> dict:
+    """Runs the (simulated) AI qualification call and persists all resulting state.
+    Reused by the ai-call endpoint and by auto-call-on-create."""
+    lead_id = lead["id"]
     star = lead.get("star_demo")
     if star:
         qual = {"budget": "₹2 Cr", "requirement": "3BHK", "location": "Gurgaon",
@@ -670,10 +672,8 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
             "location": lead.get("location") or "Gurgaon",
             "timeline": lead.get("timeline") or "60 days",
             "financing": lead.get("financing") or "Home Loan",
-            "intent": lead.get("intent") or "High" if star else (lead.get("intent") or "Medium"),
+            "intent": lead.get("intent") or "High",
         }
-        if not lead.get("intent"):
-            qual["intent"] = "High"
 
     score, breakdown = compute_score(qual["budget"], qual["timeline"], qual["requirement"],
                                      qual["intent"], appointment=True)
@@ -687,15 +687,10 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
         ]
     temp = temperature_for(score)
 
-    merged = {**lead, **qual}
-    summary = await generate_ai_summary(merged)
-
+    summary = await generate_ai_summary({**lead, **qual})
     sat_date, sat_day, sat_time = next_saturday_1130()
-    fn = lead["name"].split()[0]
-
     transcript = _demo_transcript({**lead, **qual})
 
-    # Create call
     call = {
         "id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"],
         "status": "completed", "duration": 134,
@@ -705,7 +700,6 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.calls.insert_one(call)
 
-    # Update lead
     lead_update = {
         "status": "APPOINTMENT", "lead_score": score, "temperature": temp,
         "budget": qual["budget"], "requirement": qual["requirement"], "location": qual["location"],
@@ -715,10 +709,7 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.leads.update_one({"id": lead_id}, {"$set": lead_update})
 
-    # Appointment (idempotent: replace any existing open site-visit for this lead)
-    await db.appointments.delete_many(
-        {"lead_id": lead_id, "type": "Site Visit", "status": "Scheduled"}
-    )
+    await db.appointments.delete_many({"lead_id": lead_id, "type": "Site Visit", "status": "Scheduled"})
     appt = {
         "id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"], "lead_score": score,
         "date": sat_date, "day": sat_day, "time": sat_time, "type": "Site Visit",
@@ -726,7 +717,6 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.appointments.insert_one(appt)
 
-    # Follow-up (idempotent: replace prior AI-scheduled follow-up for this lead)
     await db.followups.delete_many({"lead_id": lead_id, "type": "message", "status": "Scheduled"})
     fup = {
         "id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"],
@@ -736,7 +726,6 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     }
     await db.followups.insert_one(fup)
 
-    # Activities
     new_acts = [
         {"id": str(uuid.uuid4()), "lead_id": lead_id, "lead_name": lead["name"], "type": "qualified",
          "description": f"{lead['name']} qualified as a {temp} lead", "created_at": now_iso()},
@@ -759,6 +748,40 @@ async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
     return {"lead": updated_lead, "call": call, "appointment": appt,
             "followup": fup, "activities": new_acts, "transcript": transcript,
             "score": score, "temperature": temp, "breakdown": breakdown}
+
+
+@api.post("/leads/{lead_id}/ai-call")
+async def ai_call(lead_id: str, user: dict = Depends(get_current_user)):
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(404, "Lead not found")
+    return await run_ai_qualification(lead)
+
+
+@api.post("/leads/{lead_id}/reset")
+async def reset_lead(lead_id: str, user: dict = Depends(get_current_user)):
+    """Clears all AI-call state so the demo call can be replayed from a clean start."""
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(404, "Lead not found")
+    star = lead.get("star_demo")
+    reset_fields = {
+        "status": "CONTACTED" if star else "NEW",
+        "lead_score": 42 if star else 15,
+        "temperature": "WARM" if star else "COLD",
+        "budget": "", "requirement": "", "location": "Gurgaon",
+        "timeline": "", "financing": "", "intent": "",
+        "ai_summary": "", "score_breakdown": [],
+        "next_action": "Run AI qualification call",
+        "last_contact": now_iso(), "updated_at": now_iso(),
+    }
+    await db.leads.update_one({"id": lead_id}, {"$set": reset_fields})
+    await db.calls.delete_many({"lead_id": lead_id})
+    await db.appointments.delete_many({"lead_id": lead_id})
+    await db.followups.delete_many({"lead_id": lead_id})
+    await db.activities.delete_many({"lead_id": lead_id})
+    updated = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    return {"lead": updated}
 
 
 # ------------------------------------------------------------------ others

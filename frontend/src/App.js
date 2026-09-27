@@ -13,6 +13,7 @@ import Appointments from "@/pages/Appointments";
 import Calls from "@/pages/Calls";
 import AISalesAgent from "@/pages/AISalesAgent";
 import Settings from "@/pages/Settings";
+import ReportCard from "@/pages/ReportCard";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -34,6 +35,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/report/leads/:id"
+              element={
+                <Protected>
+                  <ReportCard />
+                </Protected>
+              }
+            />
             <Route
               element={
                 <Protected>

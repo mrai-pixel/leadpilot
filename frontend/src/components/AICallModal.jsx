@@ -6,6 +6,26 @@ import { ScoreMeter, TempBadge } from "@/components/shared";
 import { Phone, PhoneOff, CheckCircle2, Calendar, Bell, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 
+function Waveform({ active }) {
+  const bars = 34;
+  return (
+    <div className="flex h-9 items-center justify-center gap-[3px]" data-testid="call-waveform">
+      {Array.from({ length: bars }).map((_, i) => (
+        <span
+          key={i}
+          className="wave-bar w-[3px] rounded-full bg-orange-500"
+          style={{
+            height: "100%",
+            animationDelay: `${(i % 9) * 0.07}s`,
+            animationDuration: active ? "0.7s" : "1.5s",
+            opacity: active ? 1 : 0.45,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function AICallModal({ open, lead, onClose, onComplete }) {
   const [phase, setPhase] = useState("connecting"); // connecting | talking | done
   const [visible, setVisible] = useState([]);
@@ -143,6 +163,13 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
             </div>
           </div>
         </div>
+
+        {/* live waveform */}
+        {phase !== "done" && (
+          <div className="border-b border-zinc-100 bg-white px-6 py-3">
+            <Waveform active={phase === "connecting" || typing === "AI"} />
+          </div>
+        )}
 
         {/* body */}
         {phase === "connecting" && (

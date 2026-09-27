@@ -77,6 +77,12 @@ h1, h2, h3, h4, h5, .font-head {
 
 .glow-amber { box-shadow: 0 10px 40px -12px hsl(20 90% 48% / 0.35); }
 
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.22); }
+  50% { transform: scaleY(1); }
+}
+.wave-bar { transform-origin: center; animation: wave 0.9s ease-in-out infinite; }
+
 .grid-bg {
   background-image: radial-gradient(#e4e4e7 1px, transparent 1px);
   background-size: 26px 26px;

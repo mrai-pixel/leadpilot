@@ -19,6 +19,8 @@ export default function Leads() {
   const [q, setQ] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [autoCall, setAutoCall] = useState(true);
+  const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", source: "Website", budget: "", requirement: "", location: "Gurgaon", timeline: "" });
   const [csv, setCsv] = useState("name,phone,email,source,budget,requirement,timeline\nJohn Doe,+91 90000 00000,john@example.com,Website,₹1.8 Cr,3BHK,60 days");
   const navigate = useNavigate();
@@ -40,14 +42,18 @@ export default function Leads() {
 
   const addLead = async () => {
     if (!form.name) return toast.error("Name is required");
+    setAdding(true);
     try {
-      await api.post("/leads", form);
-      toast.success("Lead added");
+      const { data } = await api.post("/leads", { ...form, auto_call: autoCall });
+      if (data.auto_called) toast.success(`AI called & qualified ${data.name} — ${data.lead_score}/100 ${data.temperature}`);
+      else toast.success("Lead added");
       setAddOpen(false);
       setForm({ name: "", phone: "", email: "", source: "Website", budget: "", requirement: "", location: "Gurgaon", timeline: "" });
       load();
     } catch (e) {
       toast.error(apiError(e.response?.data?.detail));
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -159,8 +165,20 @@ export default function Leads() {
               </div>
             ))}
           </div>
+          <label className="mt-1 flex cursor-pointer items-center gap-3 rounded-md border border-orange-200 bg-orange-50 p-3" data-testid="auto-call-toggle">
+            <input
+              type="checkbox" checked={autoCall} onChange={(e) => setAutoCall(e.target.checked)}
+              data-testid="auto-call-checkbox" className="h-4 w-4 accent-orange-600"
+            />
+            <div>
+              <div className="text-sm font-semibold text-orange-800">Let the AI call &amp; qualify instantly</div>
+              <div className="text-xs text-orange-700/80">The AI Sales Employee calls the moment the lead is added.</div>
+            </div>
+          </label>
           <DialogFooter>
-            <Button onClick={addLead} data-testid="add-lead-submit" className="bg-primary text-primary-foreground hover:bg-primary/90">Add Lead</Button>
+            <Button onClick={addLead} disabled={adding} data-testid="add-lead-submit" className="bg-orange-600 text-white hover:bg-orange-700">
+              {adding ? (autoCall ? "AI calling…" : "Adding…") : (autoCall ? "Add & AI Call" : "Add Lead")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
