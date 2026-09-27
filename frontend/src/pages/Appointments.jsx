@@ -18,8 +18,8 @@ export default function Appointments() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-head text-3xl font-bold tracking-tight">Appointments</h1>
-        <p className="mt-1 text-muted-foreground">Site visits booked by your AI Sales Employee.</p>
+        <h1 className="font-display text-4xl uppercase tracking-tight">Appointments</h1>
+        <p className="mt-1 text-zinc-600">Site visits booked by your AI Sales Employee.</p>
       </div>
 
       {appts.length === 0 ? (

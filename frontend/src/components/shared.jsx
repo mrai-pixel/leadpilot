@@ -1,14 +1,14 @@
-// Shared small UI helpers for LeadPilot
+// Shared small UI helpers for LeadPilot (light editorial theme)
 import { Flame, Snowflake, Thermometer } from "lucide-react";
 
 export const STATUS_STYLES = {
-  NEW: "bg-zinc-500/15 text-zinc-300 border-zinc-500/30",
-  CONTACTED: "bg-blue-500/15 text-blue-300 border-blue-500/30",
-  ENGAGED: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-  QUALIFIED: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-  APPOINTMENT: "bg-primary/20 text-primary border-primary/40",
-  WON: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-  LOST: "bg-red-500/15 text-red-300 border-red-500/30",
+  NEW: "bg-zinc-100 text-zinc-700 border-zinc-200",
+  CONTACTED: "bg-sky-50 text-sky-700 border-sky-200",
+  ENGAGED: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  QUALIFIED: "bg-amber-50 text-amber-700 border-amber-200",
+  APPOINTMENT: "bg-orange-50 text-orange-700 border-orange-300",
+  WON: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  LOST: "bg-red-50 text-red-700 border-red-200",
 };
 
 export function StatusBadge({ status }) {
@@ -22,9 +22,9 @@ export function StatusBadge({ status }) {
 
 export function TempBadge({ temp }) {
   const map = {
-    HOT: { cls: "text-red-400", Icon: Flame, label: "HOT" },
-    WARM: { cls: "text-amber-400", Icon: Thermometer, label: "WARM" },
-    COLD: { cls: "text-sky-400", Icon: Snowflake, label: "COLD" },
+    HOT: { cls: "text-red-600", Icon: Flame, label: "HOT" },
+    WARM: { cls: "text-amber-600", Icon: Thermometer, label: "WARM" },
+    COLD: { cls: "text-sky-600", Icon: Snowflake, label: "COLD" },
   };
   const { cls, Icon, label } = map[temp] || map.COLD;
   return (
@@ -35,9 +35,9 @@ export function TempBadge({ temp }) {
 }
 
 export function scoreColor(score) {
-  if (score >= 80) return "text-emerald-400";
-  if (score >= 55) return "text-amber-400";
-  return "text-sky-400";
+  if (score >= 80) return "text-emerald-600";
+  if (score >= 55) return "text-amber-600";
+  return "text-sky-600";
 }
 
 export function ScoreMeter({ score, size = "md" }) {
@@ -45,7 +45,7 @@ export function ScoreMeter({ score, size = "md" }) {
   const active = Math.round((score / 100) * segments);
   const barH = size === "lg" ? "h-8" : "h-4";
   const color = (i) => {
-    if (i >= active) return "bg-zinc-800";
+    if (i >= active) return "bg-zinc-200";
     const ratio = score / 100;
     if (ratio >= 0.8) return "bg-emerald-500";
     if (ratio >= 0.55) return "bg-amber-500";
@@ -54,12 +54,7 @@ export function ScoreMeter({ score, size = "md" }) {
   return (
     <div className="flex items-end gap-1" data-testid="score-meter">
       {Array.from({ length: segments }).map((_, i) => (
-        <div
-          key={i}
-          className={`flex-1 rounded-sm transition-colors ${barH} ${color(i)} ${
-            i < active ? "shadow-[0_0_8px_rgba(16,185,129,0.35)]" : ""
-          }`}
-        />
+        <div key={i} className={`flex-1 rounded-sm transition-colors ${barH} ${color(i)}`} />
       ))}
     </div>
   );

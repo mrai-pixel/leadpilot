@@ -28,7 +28,7 @@ function Protected({ children }) {
 
 function App() {
   return (
-    <div className="App dark">
+    <div className="App">
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -53,7 +53,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
-        <Toaster position="top-right" theme="dark" richColors />
+        <Toaster position="top-right" theme="light" richColors />
       </AuthProvider>
     </div>
   );

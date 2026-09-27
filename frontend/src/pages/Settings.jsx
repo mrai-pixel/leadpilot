@@ -23,10 +23,10 @@ export default function Settings() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-head text-3xl font-bold tracking-tight">Settings</h1>
-          <p className="mt-1 text-muted-foreground">Organization &amp; account details.</p>
+          <h1 className="font-display text-4xl uppercase tracking-tight">Settings</h1>
+          <p className="mt-1 text-zinc-600">Organization &amp; account details.</p>
         </div>
-        <span className="rounded bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Demo Data</span>
+        <span className="rounded bg-orange-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-orange-700">Demo Data</span>
       </div>
 
       {org && (
@@ -46,8 +46,8 @@ export default function Settings() {
         <Row icon={Globe} label="Email" value={user?.email} />
       </div>
 
-      <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-6 text-sm text-blue-100/80">
-        <div className="font-semibold text-blue-300">Demo Mode</div>
+      <div className="rounded-xl border border-orange-200 bg-orange-50 p-6 text-sm text-zinc-700">
+        <div className="font-semibold text-orange-700">Demo Mode</div>
         <p className="mt-1">
           This is a demonstration environment. Real phone calling, WhatsApp, SMS and email delivery are not
           connected — calls run in Demo Call Mode. No real messages are sent.

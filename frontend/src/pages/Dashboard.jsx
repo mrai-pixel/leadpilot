@@ -9,14 +9,14 @@ import {
 } from "lucide-react";
 
 const ACT_ICON = {
-  qualified: { Icon: Flame, cls: "text-red-400" },
-  call: { Icon: Phone, cls: "text-blue-400" },
-  appointment: { Icon: CalendarCheck, cls: "text-primary" },
-  followup: { Icon: Bell, cls: "text-amber-400" },
-  score: { Icon: Star, cls: "text-emerald-400" },
+  qualified: { Icon: Flame, cls: "text-red-600" },
+  call: { Icon: Phone, cls: "text-sky-600" },
+  appointment: { Icon: CalendarCheck, cls: "text-orange-600" },
+  followup: { Icon: Bell, cls: "text-amber-600" },
+  score: { Icon: Star, cls: "text-emerald-600" },
 };
 
-const FUNNEL_COLORS = ["#3f3f46", "#3b82f6", "#6366f1", "#f59e0b", "#d97706", "#10b981"];
+const FUNNEL_COLORS = ["#71717a", "#38bdf8", "#818cf8", "#fbbf24", "#f97316", "#10b981"];
 
 function Kpi({ icon: Icon, label, value }) {
   return (
@@ -48,10 +48,10 @@ export default function Dashboard() {
       {/* header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-head text-3xl font-bold tracking-tight">Good morning, UrbanNest 👋</h1>
-          <p className="mt-1 text-muted-foreground">Here&apos;s what your AI Sales Employee accomplished today.</p>
+          <h1 className="font-display text-4xl uppercase tracking-tight">Good morning, UrbanNest 👋</h1>
+          <p className="mt-1 text-zinc-600">Here&apos;s what your AI Sales Employee accomplished today.</p>
         </div>
-        <span className="rounded bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Demo Data</span>
+        <span className="rounded bg-orange-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-orange-700">Demo Data</span>
       </div>
 
       {/* KPIs */}
@@ -65,21 +65,21 @@ export default function Dashboard() {
       </div>
 
       {/* AI Sales Employee card */}
-      <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-r from-[#120c02] to-[#0a0a0a] p-6 sm:p-8 glow-amber">
+      <div className="relative overflow-hidden rounded-xl border border-orange-200 bg-orange-50 p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-orange-600 text-white">
               <Bot className="h-7 w-7" />
             </div>
             <div>
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-400">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 pulse-ring" /> Active
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-600">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 pulse-ring" /> Active
               </div>
-              <h2 className="mt-1 font-head text-2xl font-bold tracking-tight">AI Sales Employee</h2>
-              <p className="mt-1 text-muted-foreground">Your AI is working through today&apos;s leads.</p>
+              <h2 className="mt-1 font-display text-2xl uppercase tracking-tight">AI Sales Employee</h2>
+              <p className="mt-1 text-zinc-600">Your AI is working through today&apos;s leads.</p>
             </div>
           </div>
-          <Button onClick={() => navigate("/app/agent")} data-testid="view-ai-activity-btn" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button onClick={() => navigate("/app/agent")} data-testid="view-ai-activity-btn" className="gap-2 bg-orange-600 text-white hover:bg-orange-700">
             View AI Activity <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
@@ -121,7 +121,7 @@ export default function Dashboard() {
                   <div className="w-24 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{f.stage}</div>
                   <div className="h-8 flex-1 overflow-hidden rounded-md bg-secondary/40">
                     <div
-                      className="flex h-full items-center justify-end rounded-md px-3 text-xs font-bold text-black transition-all"
+                      className="flex h-full items-center justify-end rounded-md px-3 text-xs font-bold text-white transition-all"
                       style={{ width: `${Math.max((f.count / maxFunnel) * 100, 10)}%`, backgroundColor: FUNNEL_COLORS[i] }}
                     >
                       {f.count}

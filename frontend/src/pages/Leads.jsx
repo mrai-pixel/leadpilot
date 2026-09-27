@@ -66,8 +66,8 @@ export default function Leads() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-head text-3xl font-bold tracking-tight">Leads</h1>
-          <p className="mt-1 text-muted-foreground">{leads.length} leads · managed by your AI Sales Employee</p>
+          <h1 className="font-display text-4xl uppercase tracking-tight">Leads</h1>
+          <p className="mt-1 text-zinc-600">{leads.length} leads · managed by your AI Sales Employee</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setImportOpen(true)} data-testid="import-csv-btn" className="gap-2 border-border">

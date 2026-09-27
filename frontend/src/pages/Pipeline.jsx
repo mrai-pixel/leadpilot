@@ -6,8 +6,8 @@ import { toast } from "sonner";
 
 const COLUMNS = ["NEW", "CONTACTED", "ENGAGED", "QUALIFIED", "APPOINTMENT", "WON", "LOST"];
 const COL_ACCENT = {
-  NEW: "border-t-zinc-500", CONTACTED: "border-t-blue-500", ENGAGED: "border-t-indigo-500",
-  QUALIFIED: "border-t-amber-500", APPOINTMENT: "border-t-primary", WON: "border-t-emerald-500", LOST: "border-t-red-500",
+  NEW: "border-t-zinc-400", CONTACTED: "border-t-sky-500", ENGAGED: "border-t-indigo-500",
+  QUALIFIED: "border-t-amber-500", APPOINTMENT: "border-t-orange-600", WON: "border-t-emerald-500", LOST: "border-t-red-500",
 };
 
 export default function Pipeline() {
@@ -36,8 +36,8 @@ export default function Pipeline() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-head text-3xl font-bold tracking-tight">Pipeline</h1>
-        <p className="mt-1 text-muted-foreground">Drag leads across stages · updates the CRM instantly.</p>
+        <h1 className="font-display text-4xl uppercase tracking-tight">Pipeline</h1>
+        <p className="mt-1 text-zinc-600">Drag leads across stages · updates the CRM instantly.</p>
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4" data-testid="kanban-board">
@@ -49,7 +49,7 @@ export default function Pipeline() {
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(col)}
               data-testid={`kanban-col-${col}`}
-              className={`flex w-64 shrink-0 flex-col rounded-lg border border-border border-t-2 ${COL_ACCENT[col]} bg-[#080808]`}
+              className={`flex w-64 shrink-0 flex-col rounded-lg border border-zinc-200 border-t-2 ${COL_ACCENT[col]} bg-zinc-50`}
             >
               <div className="flex items-center justify-between px-4 py-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{col}</span>

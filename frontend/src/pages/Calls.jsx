@@ -13,8 +13,8 @@ export default function Calls() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-head text-3xl font-bold tracking-tight">Calls</h1>
-        <p className="mt-1 text-muted-foreground">{calls.length} AI sales calls · Demo Call Mode</p>
+        <h1 className="font-display text-4xl uppercase tracking-tight">Calls</h1>
+        <p className="mt-1 text-zinc-600">{calls.length} AI sales calls · Demo Call Mode</p>
       </div>
 
       {calls.length === 0 ? (
@@ -55,16 +55,16 @@ export default function Calls() {
           <DialogHeader><DialogTitle className="font-head">Call Summary — {sel?.lead_name}</DialogTitle></DialogHeader>
           {sel && (
             <div className="space-y-4">
-              <div className="rounded-md border border-blue-500/20 bg-blue-500/5 p-3 text-sm">
-                <div className="flex items-center gap-1.5 text-blue-300"><Sparkles className="h-3.5 w-3.5" /> Summary</div>
-                <div className="mt-1 text-blue-50/90">{sel.summary}</div>
+              <div className="rounded-md border border-orange-200 bg-orange-50 p-3 text-sm">
+                <div className="flex items-center gap-1.5 text-orange-700"><Sparkles className="h-3.5 w-3.5" /> Summary</div>
+                <div className="mt-1 text-zinc-700">{sel.summary}</div>
               </div>
               <div>
                 <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold"><FileText className="h-4 w-4 text-muted-foreground" /> Transcript</div>
                 <div className="max-h-64 space-y-2 overflow-y-auto">
                   {sel.transcript?.map((t, i) => (
                     <div key={i} className={`flex ${t.speaker === "AI" ? "justify-start" : "justify-end"}`}>
-                      <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${t.speaker === "AI" ? "bg-blue-500/10 border border-blue-500/20 text-blue-50" : "bg-secondary"}`}>
+                      <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${t.speaker === "AI" ? "bg-orange-50 border border-orange-200 text-orange-950" : "bg-zinc-100"}`}>
                         {t.text}
                       </div>
                     </div>

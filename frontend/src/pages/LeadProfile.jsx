@@ -48,7 +48,7 @@ export default function LeadProfile() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="font-head text-3xl font-bold tracking-tight">{l.name}</h1>
+            <h1 className="font-display text-4xl uppercase tracking-tight">{l.name}</h1>
             <StatusBadge status={l.status} />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -58,13 +58,13 @@ export default function LeadProfile() {
           </div>
           <div className="mt-3">
             {l.temperature === "HOT" && (
-              <span className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1 text-sm font-bold text-red-400">
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-1 text-sm font-bold text-red-600">
                 <Zap className="h-4 w-4" /> HOT LEAD
               </span>
             )}
           </div>
         </div>
-        <Button onClick={() => setCallOpen(true)} data-testid="start-ai-call-btn" size="lg" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 glow-amber">
+        <Button onClick={() => setCallOpen(true)} data-testid="start-ai-call-btn" size="lg" className="gap-2 bg-orange-600 text-white hover:bg-orange-700 glow-amber">
           <Phone className="h-5 w-5" /> Start AI Call
         </Button>
       </div>
@@ -90,7 +90,7 @@ export default function LeadProfile() {
                   {l.score_breakdown.map((b, i) => (
                     <div key={i} className="flex items-center justify-between rounded-md bg-secondary/30 px-3 py-1.5 text-sm">
                       <span className="text-muted-foreground">{b.label}</span>
-                      <span className="font-mono font-bold text-emerald-400">+{b.points}</span>
+                      <span className="font-mono font-bold text-emerald-600">+{b.points}</span>
                     </div>
                   ))}
                 </div>
@@ -100,11 +100,11 @@ export default function LeadProfile() {
 
           {/* AI summary */}
           {l.ai_summary && (
-            <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-6">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-300">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-6">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-orange-700">
                 <Sparkles className="h-4 w-4" /> AI Lead Summary
               </div>
-              <p className="text-sm leading-relaxed text-blue-50/90" data-testid="ai-summary">{l.ai_summary}</p>
+              <p className="text-sm leading-relaxed text-zinc-700" data-testid="ai-summary">{l.ai_summary}</p>
             </div>
           )}
 
@@ -172,7 +172,7 @@ export default function LeadProfile() {
             ) : (
               <div className="space-y-3" data-testid="lead-appointments">
                 {d.appointments.map((a) => (
-                  <div key={a.id} className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <div key={a.id} className="rounded-lg border border-orange-200 bg-orange-50 p-3">
                     <div className="font-semibold">{a.type}</div>
                     <div className="text-sm text-muted-foreground">{a.day} · {a.time} · {a.date}</div>
                     <span className="mt-1 inline-block rounded bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">{a.status}</span>
@@ -194,7 +194,7 @@ export default function LeadProfile() {
                 {d.followups.map((f) => (
                   <div key={f.id} className="rounded-lg border border-border bg-secondary/30 p-3">
                     <div className="text-sm">{f.message}</div>
-                    <span className="mt-1 inline-block rounded bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-400">{f.status}</span>
+                    <span className="mt-1 inline-block rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">{f.status}</span>
                   </div>
                 ))}
               </div>
@@ -218,7 +218,7 @@ export default function LeadProfile() {
               <div className="max-h-72 space-y-2 overflow-y-auto">
                 {transcriptCall.transcript?.map((t, i) => (
                   <div key={i} className={`flex ${t.speaker === "AI" ? "justify-start" : "justify-end"}`}>
-                    <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${t.speaker === "AI" ? "bg-blue-500/10 border border-blue-500/20 text-blue-50" : "bg-secondary"}`}>
+                    <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${t.speaker === "AI" ? "bg-orange-50 border border-orange-200 text-orange-950" : "bg-zinc-100"}`}>
                       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{t.speaker === "AI" ? "Alex · AI" : "Lead"}</div>
                       {t.text}
                     </div>

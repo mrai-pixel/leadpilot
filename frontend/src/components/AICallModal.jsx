@@ -14,8 +14,8 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
   const [seconds, setSeconds] = useState(0);
   const scrollRef = useRef(null);
   const timers = useRef([]);
-  const runRef = useRef(null); // single in-flight ai-call per open (guards StrictMode double-invoke)
-  const completedRef = useRef(false); // ensures parent refresh fires exactly once
+  const runRef = useRef(null);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     if (!open) {
@@ -34,7 +34,6 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
     const isActive = () => !cancelled;
     const secInt = setInterval(() => setSeconds((s) => s + 1), 1000);
 
-    // Fire the mutation exactly ONCE per modal-open (reused across StrictMode remount).
     if (!runRef.current || runRef.current.leadId !== lead.id) {
       runRef.current = {
         leadId: lead.id,
@@ -87,7 +86,7 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
           const tDone = setTimeout(() => {
             if (!isActive()) return;
             setPhase("done");
-            fireComplete(data); // refresh parent from DB as soon as the call is done
+            fireComplete(data);
           }, 900);
           timers.current.push(tDone);
         }
@@ -106,42 +105,40 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
   const mm = String(Math.floor(seconds / 60)).padStart(1, "0");
   const ss = String(seconds % 60).padStart(2, "0");
 
-  // Any close path refreshes the parent from the DB if the mutation already ran.
   const close = () => {
     if (result) fireComplete(result);
     onClose?.();
   };
 
-  const finish = () => {
-    close();
-  };
+  const finish = () => close();
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && close()}>
       <DialogContent
-        className="max-w-lg border-border bg-[#050505] p-0 overflow-hidden"
+        className="max-w-lg border-zinc-200 bg-white p-0 overflow-hidden"
         data-testid="ai-call-modal"
       >
         <DialogTitle className="sr-only">AI Sales Call with {lead?.name}</DialogTitle>
         <DialogDescription className="sr-only">
           Simulated demo AI sales call. The AI qualifies the lead and books a site visit.
         </DialogDescription>
+
         {/* header */}
-        <div className="flex items-center justify-between border-b border-border bg-black px-6 py-4">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-6 py-4">
           <div>
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
               AI Sales Call
-              <span className="rounded bg-blue-500/15 px-1.5 py-0.5 text-[9px] text-blue-300">Demo Mode</span>
+              <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[9px] text-orange-700">Demo Mode</span>
             </div>
-            <div className="mt-1 font-head text-lg font-bold">{lead?.name}</div>
-            <div className="font-mono text-xs text-muted-foreground">{lead?.phone || "+91 •••••"}</div>
+            <div className="mt-1 font-display text-xl tracking-tight">{lead?.name}</div>
+            <div className="font-mono text-xs text-zinc-500">{lead?.phone || "+91 •••••"}</div>
           </div>
           <div className="text-right">
-            <div className="flex items-center justify-end gap-1.5 text-xs font-semibold text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 pulse-ring" />
+            <div className="flex items-center justify-end gap-1.5 text-xs font-semibold text-orange-600">
+              <span className="h-2 w-2 rounded-full bg-orange-500 pulse-ring" />
               {phase === "done" ? "Completed" : "Connected"}
             </div>
-            <div className="mt-1 font-mono text-2xl font-bold tabular-nums">
+            <div className="mt-1 font-mono text-2xl font-bold tabular-nums text-zinc-900">
               {mm}:{ss}
             </div>
           </div>
@@ -149,9 +146,9 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
 
         {/* body */}
         {phase === "connecting" && (
-          <div className="flex h-72 flex-col items-center justify-center gap-4 text-muted-foreground">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/15 pulse-ring">
-              <Phone className="h-7 w-7 text-blue-400" />
+          <div className="flex h-72 flex-col items-center justify-center gap-4 text-zinc-500">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 pulse-ring">
+              <Phone className="h-7 w-7 text-orange-600" />
             </div>
             <div className="text-sm">AI Sales Employee is dialing {lead?.name?.split(" ")[0]}…</div>
           </div>
@@ -164,11 +161,11 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
                 <div
                   className={`max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm ${
                     line.speaker === "AI"
-                      ? "bg-blue-500/10 border border-blue-500/20 text-blue-50"
-                      : "bg-secondary text-foreground"
+                      ? "bg-orange-50 border border-orange-200 text-orange-950"
+                      : "bg-zinc-100 text-zinc-900"
                   }`}
                 >
-                  <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                     {line.speaker === "AI" ? "Alex · AI" : lead?.name?.split(" ")[0]}
                   </div>
                   {line.text}
@@ -177,11 +174,11 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
             ))}
             {typing && (
               <div className={`flex ${typing === "AI" ? "justify-start" : "justify-end"}`}>
-                <div className="rounded-lg bg-secondary px-3 py-2.5">
+                <div className="rounded-lg bg-zinc-100 px-3 py-2.5">
                   <div className="flex gap-1">
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400 [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-400" />
                   </div>
                 </div>
               </div>
@@ -191,45 +188,45 @@ export default function AICallModal({ open, lead, onClose, onComplete }) {
 
         {/* result footer */}
         {phase === "done" && result ? (
-          <div className="fade-up border-t border-border bg-black px-6 py-5" data-testid="call-result">
+          <div className="fade-up border-t border-zinc-200 bg-zinc-50 px-6 py-5" data-testid="call-result">
             <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-400">
+              <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
                 <CheckCircle2 className="h-4 w-4" /> Qualification complete
               </div>
               <div className="flex items-center gap-3">
                 <TempBadge temp={result.temperature} />
-                <span className="font-head text-xl font-bold text-emerald-400">{result.score}/100</span>
+                <span className="font-display text-2xl text-emerald-600">{result.score}/100</span>
               </div>
             </div>
             <ScoreMeter score={result.score} />
             <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
-              <div className="rounded-md border border-border bg-secondary/40 p-2">
-                <TrendingUp className="mx-auto mb-1 h-4 w-4 text-primary" />
+              <div className="rounded-md border border-zinc-200 bg-white p-2 text-zinc-700">
+                <TrendingUp className="mx-auto mb-1 h-4 w-4 text-orange-600" />
                 Status → APPOINTMENT
               </div>
-              <div className="rounded-md border border-border bg-secondary/40 p-2">
-                <Calendar className="mx-auto mb-1 h-4 w-4 text-primary" />
+              <div className="rounded-md border border-zinc-200 bg-white p-2 text-zinc-700">
+                <Calendar className="mx-auto mb-1 h-4 w-4 text-orange-600" />
                 {result.appointment.day} {result.appointment.time}
               </div>
-              <div className="rounded-md border border-border bg-secondary/40 p-2">
-                <Bell className="mx-auto mb-1 h-4 w-4 text-primary" />
+              <div className="rounded-md border border-zinc-200 bg-white p-2 text-zinc-700">
+                <Bell className="mx-auto mb-1 h-4 w-4 text-orange-600" />
                 Follow-up created
               </div>
             </div>
             <Button
               onClick={finish}
               data-testid="call-finish-btn"
-              className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="mt-4 w-full bg-orange-600 text-white hover:bg-orange-700"
             >
               View updated lead
             </Button>
           </div>
         ) : (
-          <div className="border-t border-border bg-black px-6 py-3">
+          <div className="border-t border-zinc-200 bg-zinc-50 px-6 py-3">
             <Button
               variant="ghost"
               onClick={close}
-              className="w-full gap-2 text-muted-foreground hover:text-red-400"
+              className="w-full gap-2 text-zinc-500 hover:text-red-600"
               data-testid="call-hangup-btn"
             >
               <PhoneOff className="h-4 w-4" /> End call

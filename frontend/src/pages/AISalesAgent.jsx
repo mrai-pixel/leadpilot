@@ -33,23 +33,23 @@ export default function AISalesAgent() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-head text-3xl font-bold tracking-tight">AI Sales Agent</h1>
-          <p className="mt-1 text-muted-foreground">Configure how your AI Sales Employee qualifies and books.</p>
+          <h1 className="font-display text-4xl uppercase tracking-tight">AI Sales Agent</h1>
+          <p className="mt-1 text-zinc-600">Configure how your AI Sales Employee qualifies and books.</p>
         </div>
-        <span className="rounded bg-blue-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-blue-300">Demo Call Mode</span>
+        <span className="rounded bg-orange-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-orange-700">Demo Call Mode</span>
       </div>
 
       {/* agent status card */}
-      <div className="rounded-xl border border-primary/30 bg-gradient-to-r from-[#120c02] to-[#0a0a0a] p-6 glow-amber">
+      <div className="rounded-xl border border-orange-200 bg-orange-50 p-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-primary/15 text-primary">
+          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-orange-600 text-white">
             <Bot className="h-7 w-7" />
           </div>
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 pulse-ring" /> Active
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-600">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 pulse-ring" /> Active
             </div>
-            <div className="mt-1 font-head text-xl font-bold">{agent.name}</div>
+            <div className="mt-1 font-display text-xl uppercase tracking-tight">{agent.name}</div>
           </div>
         </div>
       </div>

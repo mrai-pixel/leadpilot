@@ -1,126 +1,146 @@
 {
   "project_name": "LeadPilot AI",
-  "theme": "dark",
-  "archetype": "Luxury & Swiss High-Contrast Hybrid",
-  "core_promise": "Call. Qualify. Follow up. Book. Automatically.",
+  "theme": "Light Editorial Premium (Ravan Agni Inspired)",
+  "aesthetic_reference": "https://www.ravan.ai/real (Agni by Ravan.ai - Property Tour Engine & AI Voice Sales)",
+  "design_philosophy": {
+    "core_concept": "High-contrast editorial magazine typography on ultra-clean off-white surfaces with fiery Agni accent highlights",
+    "tone": "Authoritative, cinematic, ultra-high-converting, precision-engineered",
+    "principles": [
+      "Light Editorial Dominance: Deep charcoal/near-black bold text on bright white & off-white canvases",
+      "Massive Condensed Uppercase Headings: High impact headlines with tight tracking and uppercase authority",
+      "Agni Fire Accent: Kinetic fiery orange-red (#EA580C / #DC2626) for CTAs, active AI call states, and hot badges",
+      "Structured Story Numbers: Section numbering (01, 02, 03) with technical labels for magazine flow",
+      "Tactile Data Containers: Thin precision zinc borders (#E4E4E7 / #D4D4D8), crisp light-mode cards, subtle backdrop blur"
+    ]
+  },
   "typography": {
-    "headings": {
-      "fontFamily": "'Outfit', sans-serif",
-      "instruction": "Import Outfit from Google Fonts. Use for all headings. MUST use tracking-tight to tracking-tighter for a premium enterprise feel. H1 max text-5xl to text-6xl. DO NOT use Inter or Space Grotesk."
-    },
-    "body": {
-      "fontFamily": "'Manrope', sans-serif",
-      "instruction": "Import Manrope from Google Fonts. Use for body text for high readability and a clean premium look."
-    },
-    "monospace": {
-      "fontFamily": "'JetBrains Mono', monospace",
-      "instruction": "Import from Google Fonts. Use for AI call transcripts, lead IDs, data points, and code-like elements."
+    "font_family_heading": "'Anton', 'Archivo Black', 'Bebas Neue', sans-serif",
+    "font_family_body": "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+    "font_family_mono": "'JetBrains Mono', 'Fira Code', monospace",
+    "hierarchy": {
+      "hero_title": "text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight leading-none text-zinc-950",
+      "section_heading": "text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight text-zinc-950",
+      "card_title": "text-lg sm:text-xl font-bold tracking-tight text-zinc-900",
+      "subtitle": "text-base sm:text-lg text-zinc-600 font-medium leading-relaxed",
+      "body": "text-sm sm:text-base text-zinc-700 leading-relaxed",
+      "caption_mono": "font-mono text-xs uppercase tracking-widest text-zinc-500",
+      "section_number": "font-mono text-xs md:text-sm font-bold tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 border border-orange-200 inline-block"
     }
   },
-  "colors": {
-    "background": {
-      "default": "#050505",
-      "surface": "#121212",
-      "surfaceHover": "#1C1C1F"
+  "color_palette": {
+    "mode": "light",
+    "canvas": {
+      "bg_main": "#FFFFFF",
+      "bg_secondary": "#FAFAFA",
+      "bg_tertiary": "#F4F4F5",
+      "bg_surface_card": "#FFFFFF",
+      "bg_subtle_hover": "#F4F4F5"
     },
     "text": {
-      "primary": "#FAFAFA",
-      "secondary": "#A1A1AA",
-      "muted": "#71717A"
+      "primary": "#09090B",
+      "secondary": "#52525B",
+      "muted": "#71717A",
+      "inverted": "#FFFFFF"
     },
-    "border": {
-      "default": "#27272A",
-      "focus": "#D97706"
+    "brand_accent": {
+      "agni_primary": "#EA580C",
+      "agni_hover": "#C2410C",
+      "agni_light": "#FFF7ED",
+      "agni_border": "#FDBA74",
+      "agni_text": "#9A3412"
     },
-    "primary": {
-      "default": "#D97706",
-      "hover": "#B45309",
-      "instruction": "Premium Amber/Gold for primary CTA and high-value metrics to reflect the real estate premium vibe (₹1.5-2.5 Cr properties)."
+    "borders": {
+      "default": "#E4E4E7",
+      "strong": "#D4D4D8",
+      "active": "#EA580C",
+      "subtle": "#F4F4F5"
     },
-    "accent": {
-      "default": "#3B82F6",
-      "instruction": "Electric Blue for AI actions, active call states, and processing indicators. DO NOT USE PURPLE OR TEAL GREEN."
-    },
-    "status": {
-      "success": "#10B981",
-      "warning": "#F59E0B",
-      "error": "#EF4444"
-    }
-  },
-  "visual_enhancers": {
-    "cards": "Cardless or 1px subtle border (#27272A). Flat background (#121212). Sharp edges or max rounded-md (6px). NO heavy drop shadows.",
-    "glassmorphism": "For sticky headers or floating elements: backdrop-blur-xl bg-black/60 with border-b border-white/10.",
-    "hover_states": "Slight lift (-translate-y-0.5), border color shifts to primary or accent, text brightens.",
-    "ai_call_interface": "Tactical Minimalism. Deep Obsidian background. Use 'Electric Blue' for glowing active states (text-shadow or box-shadow). Monospace fonts for timestamps and transcripts.",
-    "lead_score_visualization": "Segmented 10-bar meter or glowing heat-line. Shift from red to green based on score (0-100). Add subtle glow to the active segments."
-  },
-  "components": [
-    {
-      "name": "KPICard",
-      "instruction": "Flat #121212 background, 1px #27272A border. Value in Outfit text-3xl. Label in uppercase Manrope text-xs tracking-widest text-zinc-400."
-    },
-    {
-      "name": "AICallInterface",
-      "instruction": "Centerpiece simulated live call view. Darker inset background (#000000). Use 'tracing beam' effect on borders or pulsing Electric Blue indicator for 'AI Speaking'. Show progressive chat with typing/speaking indicators."
-    },
-    {
-      "name": "KanbanBoard",
-      "instruction": "Grid layout. Columns have bg-zinc-950/50. Cards are bg-zinc-900 border border-zinc-800. Use drag-and-drop subtle animations. Columns: NEW, CONTACTED, ENGAGED, QUALIFIED, APPOINTMENT, WON, LOST."
-    },
-    {
-      "name": "ActivityFeed",
-      "instruction": "Minimal list with a vertical connecting line (border-l border-zinc-800). Use small colored dots (Amber/Blue) for AI vs User actions."
-    }
-  ],
-  "grids_and_layouts": {
-    "dashboard": "High Density Grid (Mode B). grid-cols-1 md:grid-cols-3 lg:grid-cols-4. gap-6. Every pixel utilized. Sidebar is persistent.",
-    "landing_page": "Bento Grid (Mode A). Asymmetric. Generous spacing (py-24, py-32). Deep storytelling layout."
-  },
-  "motion": {
-    "instruction": "Subtle, professional micro-interactions. Entrance staggered animations for lists/kanban cards. Smooth AI chat sequence revealing.",
-    "forbidden": "DO NOT apply `transition: all` globally."
-  },
-  "accessibility": {
-    "instruction": "Ensure 4.5:1 contrast ratio. Interactive elements must have focus:ring-2 focus:ring-amber-500. Include data-testid on all interactive elements (e.g., data-testid='start-ai-call-btn')."
-  },
-  "media": {
-    "image_urls": {
-      "landing_hero": {
-        "url": "https://images.unsplash.com/photo-1708113388262-17fdf0e21205?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHw0fHxwcmVtaXVtJTIwbW9kZXJuJTIwYXBhcnRtZW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzg4MDA3Njc2fDA&ixlib=rb-4.1.0&q=85",
-        "description": "Premium modern apartment interior for UrbanNest Realty context"
+    "semantic_states": {
+      "hot_lead": {
+        "bg": "#FEF2F2",
+        "text": "#991B1B",
+        "border": "#FECACA",
+        "badge": "#EF4444"
       },
-      "sales_agent": {
-        "url": "https://images.unsplash.com/photo-1621255457330-7ef4e88ec27f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjd8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbCUyMG1ha2luZyUyMHBob25lJTIwY2FsbHxlbnwwfHx8fDE3ODgwMDc2NzZ8MA&ixlib=rb-4.1.0&q=85",
-        "description": "Business professional making phone call"
+      "warm_lead": {
+        "bg": "#FFFBEB",
+        "text": "#92400E",
+        "border": "#FDE68A",
+        "badge": "#F59E0B"
       },
-      "real_estate_exterior": {
-        "url": "https://images.unsplash.com/photo-1619218070141-bcfeb8b93074?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBoaWdocmlzZSUyMGJ1aWxkaW5nJTIwZXh0ZXJpb3J8ZW58MHx8fHwxNzg4MDA3Njc2fDA&ixlib=rb-4.1.0&q=85",
-        "description": "Modern highrise building exterior (dark/sunset vibe)"
+      "cold_lead": {
+        "bg": "#EFF6FF",
+        "text": "#1E40AF",
+        "border": "#BFDBFE",
+        "badge": "#3B82F6"
       },
-      "real_estate_interior_alt": {
-        "url": "https://images.unsplash.com/photo-1680416124510-5eae1beca412?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwzfHxwcmVtaXVtJTIwbW9kZXJuJTIwYXBhcnRtZW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzg4MDA3Njc2fDA&ixlib=rb-4.1.0&q=85",
-        "description": "Another premium apartment interior"
+      "appointment_booked": {
+        "bg": "#ECFDF5",
+        "text": "#065F46",
+        "border": "#A7F3D0",
+        "badge": "#10B981"
       }
     }
   },
-  "general_ui_ux_guidelines": [
-    "All interactive and key informational elements MUST include a `data-testid` attribute (kebab-case).",
-    "DO NOT use generic centered layouts. Use left alignment for dense content and optical alignment for icons.",
-    "Use 2-3x more spacing than feels comfortable (e.g., p-8, p-12).",
-    "NEVER use generic AI assistant emoji characters like 🤖🧠💭💡.",
-    "DO NOT use complete `transparent` background in header, overlays, or any surface that has content under it.",
-    "Use Phosphor Icons (@phosphor-icons/react) for a premium duotone or crisp line look.",
-    "Use sonner for toast notifications.",
-    "Avoid generic 'SaaS Blue' or AI 'Purple'. Strictly use the defined Amber/Blue accents against Obsidian.",
-    "Do not add global text-align center."
-  ],
+  "layout_and_spacing": {
+    "container_padding": "px-4 sm:px-6 lg:px-12 py-12 lg:py-20",
+    "card_padding": "p-5 sm:p-6 lg:p-8",
+    "grid_gap": "gap-6 lg:gap-8",
+    "border_radius": {
+      "card": "rounded-none md:rounded-lg",
+      "button": "rounded-md",
+      "badge": "rounded-full",
+      "input": "rounded-md"
+    },
+    "card_style": "bg-white border border-zinc-200 shadow-sm hover:shadow-md transition-all duration-200"
+  },
+  "component_guidelines": {
+    "file_type": ".js / .jsx (React JavaScript, NO TypeScript syntax)",
+    "navigation": "Sticky top bar with backdrop-blur-md bg-white/80 border-b border-zinc-200, z-50",
+    "hero_section": "Massive headline text, live call CTA button in Agni orange, subtle background architectural line art or real estate shot",
+    "live_call_console": "Interactive modal / embedded panel with real-time transcript streaming, audio waveform visualizer, AI lead scoring readout (0-100 gauge), action triggers",
+    "dashboard_kpis": "6 light-theme KPI cards with crisp zinc-200 borders, trend badges, high contrast numbers",
+    "crm_leads_table": "Clean zebra or thin-bordered table on white background with filter bars, status pill tags, inline quick call button",
+    "kanban_pipeline": "7-column swimlanes on #FAFAFA background with dragged lead cards in white #FFFFFF and sharp shadow-sm",
+    "buttons": {
+      "primary": "bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 px-6 rounded-md shadow-sm transition-all duration-150 flex items-center justify-center gap-2",
+      "secondary": "bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-2.5 px-6 rounded-md transition-all duration-150",
+      "outline": "border border-zinc-300 hover:border-zinc-900 bg-white hover:bg-zinc-50 text-zinc-900 font-medium py-2.5 px-6 rounded-md transition-all duration-150"
+    }
+  },
+  "media_assets": {
+    "curated_image_urls": [
+      {
+        "category": "hero_real_estate",
+        "url": "https://images.unsplash.com/photo-1700219447843-d9fafce8143f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTN8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjByZWFsJTIwZXN0YXRlJTIwYXBhcnRtZW50JTIwZXh0ZXJpb3IlMjBpbnRlcmlvciUyMGd1cmdhb24lMjBhcmNoaXRlY3R1cmUlMjBtb2Rlcm4lMjBob3VzZXxlbnwwfHx8fDE3OTA0OTExNTV8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Luxury apartment building exterior with modern architectural lighting"
+      },
+      {
+        "category": "modern_architecture",
+        "url": "https://images.unsplash.com/photo-1619218070141-bcfeb8b93074?crop=entropy&cs=srgb&fm=jpg&ixid=M3w8NTYxODd8MHwxfHNlYXJjaHw0fHxtaW5pbWFsJTIwbW9kZXJuJTIwcmVhbCUyMGVzdGF0ZSUyMGFyY2hpdGVjdHVyYWwlMjBidWlsZGluZyUyMGV4dGVyaW9yJTIwcGhvdG98ZW58MHx8fHwxNzkwNDkxMTYxfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Minimalist concrete modern building structure"
+      },
+      {
+        "category": "agent_portrait_1",
+        "url": "https://images.unsplash.com/photo-1656399910161-8efafd973a29?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwyfHxyZWFsJTIwZXN0YXRlJTIwYWdlbnQlMjBwcm9mZXNzaW9uYWwlMjBzbWlsaW5nJTIwYnVzaW5lc3MlMjBwb3J0cmFpdHxlbnwwfHx8fDE3OTA0OTExNTV8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Professional real estate advisor male portrait"
+      },
+      {
+        "category": "agent_portrait_2",
+        "url": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1NzZ8MHwxfHNlYXJjaHwxfHxyZWFsJTIwZXN0YXRlJTIwYWdlbnQlMjBwcm9mZXNzaW9uYWwlMjBzbWlsaW5nJTIwYnVzaW5lc3MlMjBwb3J0cmFpdHxlbnwwfHx8fDE3OTA0OTExNTV8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Professional female sales director portrait"
+      }
+    ]
+  },
+  "testing_and_accessibility": {
+    "data_testid_rule": "ALL interactive elements (buttons, inputs, links, tabs, dropdowns, modal controls) MUST contain data-testid attributes in kebab-case format.",
+    "contrast_compliance": "WCAG AA compliant contrast ratio: text-zinc-950 on bg-white is 19:1 ratio. Text colors on accents maintain > 4.5:1 ratio.",
+    "focus_states": "focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+  },
   "instructions_to_main_agent": [
-    "You are working with .js / .jsx files. DO NOT output .tsx files.",
-    "Create the app in dark mode as default using Tailwind class 'dark'.",
-    "For the landing page, build custom layout components using 'raw' HTML/Tailwind for layout freedom.",
-    "For the dashboard, customize Shadcn components to match the flat, dark, 1px border aesthetic.",
-    "The 'AI Sales Employee ACTIVE' card and 'Start AI Call' interface are the centerpieces. Make them feel highly technical but clean.",
-    "Implement the Lead Funnel using a clean, non-standard visual (avoid basic bars, use a flowing staggered list or D3/Recharts if necessary, but keep it high-end).",
-    "Ensure all routing works properly for Sidebar (Dashboard, Leads, Pipeline, AI Sales Agent, Appointments, Calls, Settings)."
+    "Ensure the application theme is light/white across all pages including marketing landing page and sidebar CRM app.",
+    "Remove dark class overlays or force-dark background styles (e.g. bg-zinc-950 or bg-black page roots should become bg-white / bg-zinc-50).",
+    "Keep Anton/Archivo Black/Bebas Neue fonts loaded for huge editorial headers on white backdrop.",
+    "Use data-testid on all interactive elements across components."
   ]
 }
